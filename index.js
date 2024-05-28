@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs").promises; // Используем промисы
+// const uuid = require("uuid");
 
 const app = express();
 const PORT = 3000;
@@ -57,6 +58,19 @@ loadUsers();
 // Получение списка пользователей
 app.get("/users", (req, res) => {
   res.json(users);
+});
+
+// Получение отсортированного в алфавитном порядке списка пользователей
+app.get("/users/sorted", (req, res) => {
+  if (users.length === 0) {
+    return res.status(404).send("No users found");
+  }
+
+  const sortedUsers = users.slice().sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
+
+  res.json(sortedUsers);
 });
 
 // Получение пользователя по id
@@ -142,19 +156,6 @@ app.get("/users/domain/:domain", (req, res) => {
     user.email.endsWith(req.params.domain)
   );
   res.json(filteredUsers);
-});
-
-// Получение отсортированного в алфавитном порядке списка пользователей
-app.get("/users/sorted", (req, res) => {
-  if (users.length === 0) {
-    return res.status(404).send("No users found");
-  }
-
-  const sortedUsers = users.slice().sort((a, b) => {
-    return a.name.localeCompare(b.name);
-  });
-
-  res.json(sortedUsers);
 });
 
 app.listen(PORT, () => {
