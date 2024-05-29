@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs").promises; // Используем промисы
-// const uuid = require("uuid");
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
 const PORT = 3000;
@@ -11,7 +11,7 @@ const USERS_FILE = path.join(__dirname, "users.json");
 app.use(bodyParser.json());
 
 app.use((err, req, res, next) => {
-  res.status(500).send("Server error");
+  res.status(500).json({ error: "Server error"});
 });
 
 // ------------------------------
@@ -63,7 +63,7 @@ app.get("/users", (req, res) => {
 // Получение отсортированного в алфавитном порядке списка пользователей
 app.get("/users/sorted", (req, res) => {
   if (users.length === 0) {
-    return res.status(404).send("No users found");
+    return res.status(404).json({ error: "No users found"});
   }
 
   const sortedUsers = users.slice().sort((a, b) => {
@@ -79,27 +79,38 @@ app.get("/users/:id", (req, res) => {
   if (user) {
     res.json(user);
   } else {
-    res.status(404).send("User not found");
+    res.status(404).json({ error: "User not found"});
   }
 });
 
 // Добавление пользователя
 app.post("/users", async (req, res) => {
-  const { name, email, age } = req.body;
+  const usersFromRequest = req.body;
 
-  if (name && email && age) {
-    const id = String(users.length + 1);
-    const newUser = { id, name, email, age };
-    users.push(newUser);
+  if (!Array.isArray(usersFromRequest)) {
+    return res.status(400).json({ error: "Invalid user data" })
+  }
 
-    try {
-      await writeUsersToFile(users);
-      res.status(201).json(newUser);
-    } catch (err) {
-      res.status(500).send("Error writing users");
+  const usersToAdd = usersFromRequest.map(user => {
+    const { name, email, age } = user;
+
+    if (name && email && age) {
+      const id = uuidv4();
+      return { id, name, email, age };
+    } else {
+      res.status(400).json({ error: "Invalid user data" });
     }
-  } else {
-    res.status(400).send("Invalid user data");
+  });
+
+  const usersToUpdate = [...users, ...usersToAdd];
+
+  try {
+    await writeUsersToFile(usersToUpdate);
+    // Возвращаем добавленных пользователей для удобства отладки
+    // Могли сделать так res.status(204).json({ message: "Success" })
+    res.status(201).json(usersToAdd);
+  } catch (err) {
+    res.status(502).json({ error: "Error writing users"});
   }
 });
 
@@ -114,12 +125,12 @@ app.put("/users/:id", async (req, res) => {
 
     try {
       await writeUsersToFile(users);
-      res.json(user);
+      res.status(200).json(user);
     } catch (err) {
-      res.status(500).send("Error writing users");
+      res.status(502).json({ error: "Error writing users"});
     }
   } else {
-    res.status(404).send("User not found");
+    res.status(404).json({ error: "User not found"});
   }
 });
 
@@ -134,12 +145,12 @@ app.delete("/users/:id", async (req, res) => {
 
     try {
       await writeUsersToFile(users);
-      res.json(user);
+      res.status(200).json(user);
     } catch (err) {
-      res.status(500).send("Error writing users");
+      res.status(502).json({ error: "Error writing users"});
     }
   } else {
-    res.status(404).send("User not found");
+    res.status(404).json({ error: "User not found"});
   }
 });
 
@@ -147,7 +158,7 @@ app.delete("/users/:id", async (req, res) => {
 app.get("/users/age/:age", (req, res) => {
   const parsedAge = parseInt(req.params.age, 10);
   const filteredUsers = users.filter((user) => user.age > parsedAge);
-  res.json(filteredUsers);
+  res.status(200).json(filteredUsers);
 });
 
 // Поиск пользователей по домену
@@ -155,7 +166,7 @@ app.get("/users/domain/:domain", (req, res) => {
   const filteredUsers = users.filter((user) =>
     user.email.endsWith(req.params.domain)
   );
-  res.json(filteredUsers);
+  res.status(200).json(filteredUsers);
 });
 
 app.listen(PORT, () => {
