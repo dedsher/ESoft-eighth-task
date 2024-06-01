@@ -1,17 +1,19 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs").promises; // Используем промисы
 const { v4: uuidv4 } = require("uuid");
+const { HTTP_CODES, HTTP_MESSAGES } = require("./constants");
 
 const app = express();
 const PORT = 3000;
 const USERS_FILE = path.join(__dirname, "users.json");
 
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use((err, req, res, next) => {
-  res.status(500).json({ error: "Server error"});
+  res
+    .status(HTTP_CODES.SERVER_ERROR)
+    .json({ error: HTTP_MESSAGES.SERVER_ERROR });
 });
 
 // ------------------------------
@@ -63,7 +65,9 @@ app.get("/users", (req, res) => {
 // Получение отсортированного в алфавитном порядке списка пользователей
 app.get("/users/sorted", (req, res) => {
   if (users.length === 0) {
-    return res.status(404).json({ error: "No users found"});
+    return res
+      .status(HTTP_CODES.NOT_FOUND)
+      .json({ error: HTTP_MESSAGES.USER_NOT_FOUND });
   }
 
   const sortedUsers = users.slice().sort((a, b) => {
@@ -79,7 +83,9 @@ app.get("/users/:id", (req, res) => {
   if (user) {
     res.json(user);
   } else {
-    res.status(404).json({ error: "User not found"});
+    res
+      .status(HTTP_CODES.NOT_FOUND)
+      .json({ error: HTTP_MESSAGES.USER_NOT_FOUND });
   }
 });
 
@@ -88,19 +94,27 @@ app.post("/users", async (req, res) => {
   const usersFromRequest = req.body;
 
   if (!Array.isArray(usersFromRequest)) {
-    return res.status(400).json({ error: "Invalid user data" })
+    return res
+      .status(HTTP_CODES.BAD_REQUEST)
+      .json({ error: HTTP_MESSAGES.INVALID_USER_DATA });
   }
 
-  const usersToAdd = usersFromRequest.map(user => {
+  const usersToAdd = usersFromRequest.map((user) => {
     const { name, email, age } = user;
 
     if (name && email && age) {
       const id = uuidv4();
       return { id, name, email, age };
-    } else {
-      res.status(400).json({ error: "Invalid user data" });
     }
+
+    return null;
   });
+
+  if (usersToAdd.includes(null)) {
+    return res
+      .status(HTTP_CODES.BAD_REQUEST)
+      .json({ error: HTTP_MESSAGES.INVALID_USER_DATA });
+  }
 
   const usersToUpdate = [...users, ...usersToAdd];
 
@@ -108,9 +122,11 @@ app.post("/users", async (req, res) => {
     await writeUsersToFile(usersToUpdate);
     // Возвращаем добавленных пользователей для удобства отладки
     // Могли сделать так res.status(204).json({ message: "Success" })
-    res.status(201).json(usersToAdd);
+    res.status(HTTP_CODES.CREATED).json(usersToAdd);
   } catch (err) {
-    res.status(502).json({ error: "Error writing users"});
+    res
+      .status(HTTP_CODES.SERVER_ERROR)
+      .json({ error: HTTP_MESSAGES.ERROR_WRITING_USERS });
   }
 });
 
@@ -125,12 +141,16 @@ app.put("/users/:id", async (req, res) => {
 
     try {
       await writeUsersToFile(users);
-      res.status(200).json(user);
+      res.status(HTTP_CODES.OK).json(user);
     } catch (err) {
-      res.status(502).json({ error: "Error writing users"});
+      res
+        .status(HTTP_CODES.SERVER_ERROR)
+        .json({ error: HTTP_MESSAGES.ERROR_WRITING_USERS });
     }
   } else {
-    res.status(404).json({ error: "User not found"});
+    res
+      .status(HTTP_CODES.NOT_FOUND)
+      .json({ error: HTTP_MESSAGES.USER_NOT_FOUND });
   }
 });
 
@@ -145,12 +165,16 @@ app.delete("/users/:id", async (req, res) => {
 
     try {
       await writeUsersToFile(users);
-      res.status(200).json(user);
+      res.status(HTTP_CODES.OK).json(user);
     } catch (err) {
-      res.status(502).json({ error: "Error writing users"});
+      res
+        .status(HTTP_CODES.SERVER_ERROR)
+        .json({ error: HTTP_MESSAGES.ERROR_WRITING_USERS });
     }
   } else {
-    res.status(404).json({ error: "User not found"});
+    res
+      .status(HTTP_CODES.NOT_FOUND)
+      .json({ error: HTTP_MESSAGES.USER_NOT_FOUND });
   }
 });
 
@@ -158,7 +182,7 @@ app.delete("/users/:id", async (req, res) => {
 app.get("/users/age/:age", (req, res) => {
   const parsedAge = parseInt(req.params.age, 10);
   const filteredUsers = users.filter((user) => user.age > parsedAge);
-  res.status(200).json(filteredUsers);
+  res.status(HTTP_CODES.OK).json(filteredUsers);
 });
 
 // Поиск пользователей по домену
@@ -166,7 +190,7 @@ app.get("/users/domain/:domain", (req, res) => {
   const filteredUsers = users.filter((user) =>
     user.email.endsWith(req.params.domain)
   );
-  res.status(200).json(filteredUsers);
+  res.status(HTTP_CODES.OK).json(filteredUsers);
 });
 
 app.listen(PORT, () => {
