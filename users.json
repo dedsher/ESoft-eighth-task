@@ -1,0 +1,86 @@
+[
+  {
+    "id": "b9b1089a-95fd-4650-a167-c9b7508e1256",
+    "name": "User1",
+    "email": "user1@example.com",
+    "age": 46
+  },
+  {
+    "id": "0011c27a-7dc3-4ce9-b7a2-8193b370cafa",
+    "name": "User2",
+    "email": "user2@example.com",
+    "age": 33
+  },
+  {
+    "id": "a4a921ca-a182-48c8-8882-4fead822732a",
+    "name": "Kristina Omutova",
+    "email": "user3@example.com",
+    "age": 50
+  },
+  {
+    "id": "54de7ca4-40a1-4937-a801-0a46c8b72876",
+    "name": "User4",
+    "email": "user4@example.com",
+    "age": 62
+  },
+  {
+    "id": "88d65789-9314-4dc5-8349-2dd8a52820e4",
+    "name": "User5",
+    "email": "user5@example.com",
+    "age": 37
+  },
+  {
+    "id": "5f4b5d4a-0bcd-487c-88be-198d98674d2d",
+    "name": "User6",
+    "email": "user6@example.com",
+    "age": 28
+  },
+  {
+    "id": "6932a554-1e0c-48c9-89a9-cdf6751defc1",
+    "name": "User7",
+    "email": "user7@example.com",
+    "age": 61
+  },
+  {
+    "id": "9581d16a-9abd-41b4-b62d-27b2683cb847",
+    "name": "User8",
+    "email": "user8@example.com",
+    "age": 57
+  },
+  {
+    "id": "dfe545a3-c3d4-4481-a402-a2303f17a25f",
+    "name": "User9",
+    "email": "user9@example.com",
+    "age": 51
+  },
+  {
+    "id": "d94066b9-3c5c-424d-9edf-3e510dabd5d8",
+    "name": "User10",
+    "email": "user10@example.com",
+    "age": 61
+  },
+  {
+    "id": "4c0cd1c2-ad5b-42c9-86d6-3e60232c1b84",
+    "name": "Vova Putin",
+    "email": "kremlin@gosuslugi.fun",
+    "age": 19
+  },
+  {
+    "id": "3eeee608-6f0e-4f02-ad32-6a68dfa90f83",
+    "name": "Joe Bidon",
+    "email": "eagle@democracy.grandfather",
+    "age": 96
+  },
+  {
+    "id": "10b2165b-1883-432b-8344-90f99f46ba3f",
+    "name": "Mark Polyakov",
+    "email": "markpolyakov95@mail.ru",
+    "age": 19
+  },
+  {
+    "id": "4ccf25f3-d31c-4ea2-9cb1-b36b2f82c6ae",
+    "name": "Roma Shamov",
+    "email": "deadsher@mail.ru",
+    "age": 19
+  }
+]
